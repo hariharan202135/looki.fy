@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Looki.fy - Smart Image Recognizer</title>
+
+  <style>
+    body {
+      font-family: "Poppins", sans-serif;
+      background: #f5f6fa;
+      margin: 0;
+      text-align: center;
+    }
+
+    .header {
+      background: #5e2ced;
+      color: white;
+      padding: 25px;
+      border-radius: 0 0 20px 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+
+    h1 { margin: 0; font-size: 36px; }
+    .sub { opacity: .9; }
+
+    .container {
+      margin-top: 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 40px;
+    }
+
+    .card {
+      background: white;
+      width: 90%;
+      max-width: 450px;
+      padding: 25px;
+      border-radius: 15px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    input[type="file"] {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 12px;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+    }
+
+    button {
+      background: #5e2ced;
+      color: white;
+      border: none;
+      padding: 12px 22px;
+      font-size: 17px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    button:hover { background: #4a20c8; }
+
+    .result-img {
+      width: 300px;
+      border-radius: 12px;
+      margin-top: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="header">
+    <h1>👁️ Looki.fy</h1>
+    <p class="sub">Upload or capture a photo — AI will identify it!</p>
+  </div>
+
+  <div class="container">
+
+    <!-- Upload Card -->
+    <div class="card">
+      <h2>📤 Upload an Image</h2>
+      <form action="/predict" method="POST" enctype="multipart/form-data">
+        <input type="file" name="file" required>
+        <button type="submit">Recognize Image</button>
+      </form>
+    </div>
+
+    <!-- Live Camera -->
+    <div class="card">
+      <h2>📸 Live Camera</h2>
+      <img src="/video" width="100%" style="border-radius:12px;">
+      <br><br>
+      <button onclick="capture()">Capture & Predict</button>
+
+      <div id="capture-result"
+           style="margin-top:15px;font-size:18px;font-weight:600;color:#333;">
+      </div>
+    </div>
+
+    <!-- Upload Result -->
+    {% if img_path %}
+    <div class="card">
+      <h2>🖼️ Uploaded Image Result</h2>
+      <img src="{{ img_path }}" class="result-img">
+      <p><strong>Prediction:</strong> {{ label }}</p>
+    </div>
+    {% endif %}
+  </div>
+
+  <script>
+    function capture() {
+      document.getElementById("capture-result").innerHTML =
+          "⏳ Analyzing...";
+
+      fetch("/capture")
+        .then(res => res.json())
+        .then(data => {
+          if (data.error) {
+            document.getElementById("capture-result").innerHTML =
+                "❌ Error: " + data.error;
+          } else {
+            document.getElementById("capture-result").innerHTML =
+                `<strong>Prediction:</strong> ${data.prediction}`;
+          }
+        })
+        .catch(err => {
+          document.getElementById("capture-result").innerHTML =
+              "❌ Failed: " + err;
+        });
+    }
+  </script>
+
+</body>
+</html>
